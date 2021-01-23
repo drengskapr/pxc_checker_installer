@@ -1,0 +1,12 @@
+---
+- name: Setting up PXC-checker
+  hosts: all
+  remote_user: root
+  roles:
+    - pxc-checker_install
+  vars:
+    pxc_checker_version: 0.12.02
+    pxc_checker_monitor_user: user
+    pxc_checker_monitor_password: user
+    pxc_checker_user: another_user
+    pxc_checker_group: another_user

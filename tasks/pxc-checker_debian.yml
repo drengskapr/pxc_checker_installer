@@ -1,0 +1,66 @@
+---
+
+  - name: PXC-checker download archive
+    get_url:
+      url: "https://github.com/larrabee/pxc-checker/releases/download/{{ pxc_checker_version }}/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64.tar.gz"
+      dest: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64.tar.gz"
+
+  - name: Create directory where to unarchive to
+    file:
+      path: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64"
+      state: directory
+      owner: root
+      group: root
+
+  - name: PXC-checker unpack archive
+    unarchive:
+      src: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64.tar.gz"
+      dest: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64/"
+      remote_src: yes
+      creates: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64/pxc-checker"
+
+  - name: PXC-checker copy binary to working directory
+    copy:
+      src: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64/pxc-checker"
+      dest: /usr/bin/pxc-checker
+      mode: 0755
+      owner: root
+      group: root
+      remote_src: yes
+
+  - name: Add pxc-checker systemd unit-file
+    template:
+      src: templates/pxc-checker@.service.j2
+      dest: /etc/systemd/system/pxc-checker@.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create pxc-checker config directory
+    file:
+      path: /etc/pxc/checker
+      state: directory
+      recurse: yes
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Add pxc-checker config file
+    template:
+      src: templates/cluster.conf.j2
+      dest: /etc/pxc/checker/cluster.conf
+      owner: root
+      group: root
+      mode: 0644   
+
+  - name: Start pxc-checker service
+    systemd:
+      state: started
+      enabled: yes
+      name: pxc-checker@cluster
+      daemon_reload: yes
+
+  - name: Clean tmp folder
+    file:
+      path: "/tmp/pxc-checker_{{ pxc_checker_version }}_Linux_x86_64"
+      state: absent

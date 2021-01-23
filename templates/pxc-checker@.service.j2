@@ -1,0 +1,14 @@
+[Unit]
+Description=PXC Checker
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/pxc/checker/%i.conf
+ExecStart=/usr/bin/pxc-checker
+KillMode=process
+Restart=always
+User={{ pxc_checker_user }}
+Group={{ pxc_checker_group }}
+
+[Install]
+WantedBy=multi-user.target
